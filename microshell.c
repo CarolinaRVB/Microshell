@@ -6,7 +6,7 @@
 /*   By: crebelo- <crebelo-@student.42lisboa.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/06 09:35:16 by crebelo-          #+#    #+#             */
-/*   Updated: 2024/10/06 09:43:39 by crebelo-         ###   ########.fr       */
+/*   Updated: 2024/10/06 10:29:53 by crebelo-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,19 +81,18 @@ int next_cmd(char **argv, int *last) {
 }
 
 int execute_cmds(int argc, char **argv, char **envp) {
-	int npipes = count_pipes(argc, argv);
-	int status = 0;
-	int fds[2];
-	int first_fd = -1;
-	pid_t pid;
 	int i = 0;
+	int status = 0;
+	int first_fd = -1;
+	int npipes = count_pipes(argc, argv);
+	int fds[2];
+	pid_t pid;
 
 	while (npipes > 0) {
 		if (pipe(fds) == -1) {
 			print_error("error: fatal", NULL, STDERR_FILENO);
 			exit(1);
 		}
-		
 		i = 0;
 		while (argv[i]) {
 			if (strcmp(argv[i], "|") == 0) {
@@ -102,13 +101,11 @@ int execute_cmds(int argc, char **argv, char **envp) {
 			}
 			i++;
 		}
-
 		pid = fork();
 		if (pid < 0) {
 			print_error("error: fatal", NULL, STDERR_FILENO);
 			exit(1);
 		}
-
 		if (pid == 0) { // Child process
 			handle_pipe_redirection(fds, first_fd); // Manage pipe redirection
 			execute_single_cmd(argv, envp); // Execute the command
